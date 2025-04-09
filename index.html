@@ -1,58 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Loan Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Loan Calculator</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .input-group { margin: 10px 0; }
-        label { display: inline-block; width: 180px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .event-section { background: #f8f8f8; padding: 15px; margin: 15px 0; }
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --background: #f8f9fa;
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--background);
+            color: var(--text);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .input-section, .events-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .event-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .events-list {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .event-card {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .event-marker {
+            background-color: #ffeeba;
+            font-weight: bold;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toggle-button {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #eee;
+            border: none;
+            color: #666;
+        }
+
+        .toggle-button.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Loan Calculator</h1>
+    <h1>Advanced Loan Calculator</h1>
     
-    <div class="input-group">
-        <label>Loan Amount:</label>
-        <input type="number" id="principal" step="1000" value="100000">
-    </div>
-    
-    <div class="input-group">
-        <label>Start Date:</label>
-        <input type="date" id="startDate" value="<?= date('Y-m-d') ?>">
-    </div>
-    
-    <div class="input-group">
-        <label>Initial Annual Rate (%):</label>
-        <input type="number" id="initialRate" step="0.1" value="5">
-    </div>
-    
-    <div class="input-group">
-        <label>Loan Tenure (months):</label>
-        <input type="number" id="tenure" value="12">
-    </div>
+    <div class="dashboard">
+        <div class="input-section">
+            <div class="input-group">
+                <label>Loan Amount ($)</label>
+                <input type="number" id="principal" value="100000" step="1000">
+            </div>
+            
+            <div class="input-group">
+                <label>Start Date</label>
+                <input type="date" id="startDate">
+            </div>
+            
+            <div class="input-group">
+                <label>Annual Rate (%)</label>
+                <input type="number" id="initialRate" value="5" step="0.1">
+            </div>
+            
+            <div class="input-group">
+                <label>Loan Tenure</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="years" placeholder="Years" style="flex: 1;">
+                    <input type="number" id="months" placeholder="Months" style="flex: 1;">
+                </div>
+            </div>
 
-    <div class="event-section">
-        <h3>Add Events</h3>
-        <div>
-            <select id="eventType">
-                <option value="rate">Rate Change</option>
-                <option value="prepayment">Prepayment</option>
-                <option value="emi">EMI Change</option>
-            </select>
-            <input type="date" id="eventDate">
-            <input type="number" id="eventValue" placeholder="Value">
-            <button onclick="addEvent()">Add Event</button>
+            <div class="input-group">
+                <label>Date Format</label>
+                <div class="toggle-group">
+                    <button class="toggle-button active" onclick="setDateFormat('full')">Full Date</button>
+                    <button class="toggle-button" onclick="setDateFormat('month')">Month/Year</button>
+                </div>
+            </div>
         </div>
-        <div id="eventList"></div>
+
+        <div class="events-section">
+            <h3>Loan Events</h3>
+            <div class="event-buttons">
+                <button onclick="showEventForm('rate')">Add Rate Change</button>
+                <button onclick="showEventForm('prepayment')">Add Prepayment</button>
+                <button onclick="showEventForm('emi')">Adjust EMI</button>
+                <button onclick="showEventForm('tenure')">Adjust Tenure</button>
+            </div>
+
+            <div id="eventForm" style="display: none;">
+                <div class="input-group">
+                    <label>Event Date</label>
+                    <input type="date" id="eventDate">
+                </div>
+                <div class="input-group">
+                    <label id="valueLabel">Value</label>
+                    <input type="number" id="eventValue">
+                </div>
+                <button onclick="addEvent()">Add Event</button>
+            </div>
+
+            <div class="events-list" id="eventsList"></div>
+        </div>
     </div>
 
-    <button onclick="calculate()" style="margin: 20px 0; padding: 10px 20px;">Calculate Schedule</button>
-
-    <table id="result">
+    <table>
         <thead>
             <tr>
                 <th>Date</th>
@@ -61,6 +213,7 @@
                 <th>Interest</th>
                 <th>Remaining</th>
                 <th>Rate</th>
+                <th>Events</th>
             </tr>
         </thead>
         <tbody id="scheduleBody"></tbody>
@@ -68,23 +221,74 @@
 
     <script>
         let events = [];
+        let dateFormat = 'full';
+        let currentEventType = null;
+
+        // Automatic calculation triggers
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', debounce(calculate, 300));
+        });
+
+        function setDateFormat(format) {
+            dateFormat = format;
+            document.querySelectorAll('.toggle-button').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(format));
+            });
+            calculate();
+        }
+
+        function showEventForm(type) {
+            currentEventType = type;
+            const form = document.getElementById('eventForm');
+            const labels = {
+                rate: { label: 'New Rate (%)', step: '0.1' },
+                prepayment: { label: 'Amount ($)', step: '100' },
+                emi: { label: 'New EMI ($)', step: '100' },
+                tenure: { label: 'New Tenure (months)', step: '1' }
+            };
+            
+            document.getElementById('valueLabel').textContent = labels[type].label;
+            document.getElementById('eventValue').step = labels[type].step;
+            form.style.display = 'block';
+        }
 
         function addEvent() {
             const event = {
-                type: document.getElementById('eventType').value,
+                type: currentEventType,
                 date: new Date(document.getElementById('eventDate').value),
                 value: parseFloat(document.getElementById('eventValue').value)
             };
             
             events.push(event);
-            updateEventList();
+            updateEventsList();
+            calculate();
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventForm').style.display = 'none';
         }
 
-        function updateEventList() {
-            const list = document.getElementById('eventList');
-            list.innerHTML = events.map((e, i) => 
-                `<div>${e.type} on ${e.date.toISOString().split('T')[0]}: ${e.value}</div>`
-            ).join('');
+        function updateEventsList() {
+            const list = document.getElementById('eventsList');
+            list.innerHTML = events.map(event => `
+                <div class="event-card">
+                    <div>
+                        <strong>${event.type.toUpperCase()}</strong><br>
+                        ${event.date.toLocaleDateString()}: ${event.value}
+                    </div>
+                    <button onclick="removeEvent(${events.indexOf(event)})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeEvent(index) {
+            events.splice(index, 1);
+            updateEventsList();
+            calculate();
+        }
+
+        function getTenureInMonths() {
+            const years = parseInt(document.getElementById('years').value) || 0;
+            const months = parseInt(document.getElementById('months').value) || 0;
+            return years * 12 + months;
         }
 
         function calculateEMI(principal, monthlyRate, tenure) {
@@ -97,7 +301,7 @@
             const principal = parseFloat(document.getElementById('principal').value);
             const startDate = new Date(document.getElementById('startDate').value);
             const annualRate = parseFloat(document.getElementById('initialRate').value) / 100;
-            const tenure = parseInt(document.getElementById('tenure').value);
+            const tenure = getTenureInMonths();
 
             let currentPrincipal = principal;
             let monthlyRate = annualRate / 12;
@@ -105,15 +309,15 @@
             let currentDate = new Date(startDate);
             let remainingTenure = tenure;
 
-            // Sort events by date
             const sortedEvents = [...events].sort((a, b) => a.date - b.date);
+            let originalEMI = calculateEMI(principal, monthlyRate, tenure);
 
             for (let month = 0; month < tenure; month++) {
                 if (currentPrincipal <= 0) break;
 
                 // Process events
-                while (sortedEvents.length > 0 && 
-                      sortedEvents[0].date <= currentDate) {
+                const currentEvents = [];
+                while (sortedEvents.length > 0 && sortedEvents[0].date <= currentDate) {
                     const event = sortedEvents.shift();
                     switch(event.type) {
                         case 'rate':
@@ -123,13 +327,17 @@
                             currentPrincipal -= event.value;
                             break;
                         case 'emi':
-                            emi = event.value;
+                            originalEMI = event.value;
+                            break;
+                        case 'tenure':
+                            remainingTenure = event.value - month;
                             break;
                     }
+                    currentEvents.push(event);
                 }
 
-                // Calculate EMI
-                const emi = calculateEMI(currentPrincipal, monthlyRate, remainingTenure);
+                // Calculate payment
+                const emi = Math.min(originalEMI, calculateEMI(currentPrincipal, monthlyRate, remainingTenure));
                 const interest = currentPrincipal * monthlyRate;
                 const principalPayment = Math.min(emi - interest, currentPrincipal);
 
@@ -142,7 +350,8 @@
                     principal: principalPayment,
                     interest: interest,
                     remaining: currentPrincipal,
-                    rate: monthlyRate * 12 * 100
+                    rate: monthlyRate * 12 * 100,
+                    events: currentEvents.map(e => `${e.type}: ${e.value}`).join(', ')
                 });
 
                 currentDate.setMonth(currentDate.getMonth() + 1);
@@ -154,16 +363,36 @@
         function displaySchedule(schedule) {
             const tbody = document.getElementById('scheduleBody');
             tbody.innerHTML = schedule.map(payment => `
-                <tr>
-                    <td>${payment.date.toISOString().split('T')[0]}</td>
+                <tr class="${payment.events ? 'event-marker' : ''}">
+                    <td>${formatDate(payment.date)}</td>
                     <td>${payment.emi.toFixed(2)}</td>
                     <td>${payment.principal.toFixed(2)}</td>
                     <td>${payment.interest.toFixed(2)}</td>
                     <td>${Math.max(payment.remaining, 0).toFixed(2)}</td>
                     <td>${payment.rate.toFixed(2)}%</td>
+                    <td>${payment.events || ''}</td>
                 </tr>
             `).join('');
         }
+
+        function formatDate(date) {
+            if (dateFormat === 'month') {
+                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            }
+            return date.toLocaleDateString();
+        }
+
+        function debounce(func, timeout = 300) {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+
+        // Initialize default dates
+        document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+        calculate();
     </script>
 </body>
 </html>
