@@ -1,25 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loan Calculator</title>
+    <title>Smart Loan Calculator</title>
+    <!-- CSS CDNs -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css">
+    <!-- Local CSS -->
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <header>
         <h1><i class="fas fa-calculator"></i> Smart Loan Calculator</h1>
-        <div class="theme-switch">
-            <button onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+        <div class="theme-controls">
+            <button id="themeToggle"><i class="fas fa-moon"></i></button>
         </div>
     </header>
 
     <main>
         <!-- Input Section -->
-        <section class="calculator-card">
-            <!-- Input fields here -->
+        <section class="input-card">
+            <!-- Currency Selector -->
+            <div class="input-group">
+                <label><i class="fas fa-coins"></i> Currency</label>
+                <select id="currencySelect" class="currency-select"></select>
+            </div>
+
+            <!-- Loan Details -->
+            <div class="input-group">
+                <label><i class="fas fa-hand-holding-usd"></i> Loan Amount</label>
+                <div class="slider-container">
+                    <input type="range" id="amountSlider" min="1000" max="1000000" step="1000">
+                    <input type="number" id="principal" value="1000000" step="1000">
+                </div>
+            </div>
+
+            <!-- Date and Rate Inputs -->
+            <div class="input-group">
+                <label><i class="fas fa-calendar-alt"></i> Start Date</label>
+                <input type="date" id="startDate">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-percentage"></i> Interest Rate</label>
+                <div class="slider-container">
+                    <input type="range" id="rateSlider" min="1" max="20" step="0.1">
+                    <input type="number" id="interestRate" value="8.5" step="0.1">
+                </div>
+            </div>
+
+            <!-- Tenure Input -->
+            <div class="input-group">
+                <label><i class="fas fa-clock"></i> Loan Tenure</label>
+                <div class="tenure-inputs">
+                    <input type="number" id="years" placeholder="Years" min="0">
+                    <input type="number" id="months" placeholder="Months" min="0" max="11">
+                </div>
+            </div>
         </section>
 
         <!-- Chart Section -->
@@ -30,14 +71,23 @@
         <!-- Optimization Tips -->
         <section class="tips-card">
             <h3><i class="fas fa-lightbulb"></i> Optimization Tips</h3>
-            <div id="tipsContent"></div>
+            <div id="optimizationTips"></div>
         </section>
 
         <!-- Schedule Table -->
         <section class="table-card">
-            <table>
-                <!-- Table content -->
-            </table>
+            <div class="table-header">
+                <h3><i class="fas fa-table"></i> Payment Schedule</h3>
+                <div class="date-format">
+                    <label><input type="radio" name="dateFormat" value="full" checked> Full Date</label>
+                    <label><input type="radio" name="dateFormat" value="month"> Month/Year</label>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <!-- Table content -->
+                </table>
+            </div>
         </section>
     </main>
 
@@ -45,6 +95,11 @@
         <p>Made with ❤️ by Tokudai</p>
     </footer>
 
+    <!-- JS CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+    <!-- Local JS -->
     <script src="app.js"></script>
 </body>
+
 </html>
