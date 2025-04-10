@@ -8,6 +8,7 @@
         content="Advanced loan calculator with floating rates, prepayments, and dynamic adjustments">
     <title>ProLoan - Smart Loan Calculator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
             --primary: #24774c;
@@ -148,6 +149,7 @@
             cursor: pointer;
             border: none;
             font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
         .event-section {
@@ -188,11 +190,37 @@
             margin-top: 3rem;
             padding: 2rem;
             color: var(--text);
+            opacity: 0.8;
+        }
+
+        .flatpickr-input {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+        }
+
+        .slider-container {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .event-card {
+            background: var(--surface);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .context-menu {
             position: relative;
             display: inline-block;
+            cursor: pointer;
         }
 
         .menu-content {
@@ -201,34 +229,20 @@
             right: 0;
             background: var(--surface);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1;
             border-radius: 8px;
             padding: 0.5rem;
             min-width: 160px;
-            z-index: 1;
         }
 
-        .event-row {
-            background: rgba(36, 119, 76, 0.1);
+        .menu-item {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
-        .date-format-switcher {
-            display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-
-        .amount-summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-
-        .summary-card {
-            background: var(--background);
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
+        .menu-item:hover {
+            background: rgba(0, 0, 0, 0.05);
         }
     </style>
 </head>
@@ -236,8 +250,8 @@
 <body>
     <header>
         <div class="logo">
-            <i class="fas fa-calculator" style="font-size: 2rem; color: var(--primary)"></i>
-            <h1 style="margin-left: 1rem;">ProLoan Calculator</h1>
+            <i class="fas fa-coins" style="font-size: 2rem; color: var(--primary)"></i>
+            <h1 style="display: inline-block; margin-left: 1rem;">ProLoan Calculator</h1>
         </div>
         <div class="theme-toggle">
             <i class="fas fa-sun"></i>
@@ -250,18 +264,9 @@
     </header>
 
     <div class="calculator-card">
+        <!-- Loan Inputs -->
         <div class="input-group">
-            <label><i class="fas fa-coins"></i> Currency</label>
-            <select id="currency" onchange="updateCurrency()">
-                <option value="INR">Indian Rupee (₹)</option>
-                <option value="USD">US Dollar ($)</option>
-                <option value="EUR">Euro (€)</option>
-                <option value="GBP">British Pound (£)</option>
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label><i class="fas fa-hand-holding-usd"></i> Loan Amount</label>
+            <label><i class="fas fa-coins"></i> Loan Amount</label>
             <div class="slider-container">
                 <input type="range" id="amountSlider" min="100000" max="10000000" step="1000" value="1000000">
                 <input type="number" id="amount" value="1000000" step="1000">
@@ -271,14 +276,14 @@
         <div class="input-group">
             <label><i class="fas fa-percentage"></i> Interest Rate</label>
             <div class="slider-container">
-                <input type="range" id="rateSlider" min="1" max="20" step="0.01" value="8.5">
-                <input type="number" id="rate" value="8.5" step="0.01">
+                <input type="range" id="rateSlider" min="1" max="20" step="0.1" value="8.5">
+                <input type="number" id="rate" value="8.5" step="0.1">
             </div>
         </div>
 
         <div class="input-group">
             <label><i class="fas fa-calendar-alt"></i> Start Date</label>
-            <input type="date" id="startDate">
+            <input type="text" id="startDate" class="flatpickr-input" placeholder="Select Date">
         </div>
 
         <div class="input-group">
@@ -289,33 +294,35 @@
             </div>
         </div>
 
-        <div class="date-format-switcher">
-            <label><input type="radio" name="dateFormat" value="full" checked> DD MMM YYYY</label>
-            <label><input type="radio" name="dateFormat" value="month"> MMMM YYYY</label>
-        </div>
-
+        <!-- Events Section -->
         <div class="event-section">
             <h3><i class="fas fa-calendar-plus"></i> Loan Events</h3>
+            <div style="display: flex; gap: 1rem; margin: 1rem 0;">
+                <button onclick="showEventForm('rate')"><i class="fas fa-chart-line"></i> Rate Change</button>
+                <button onclick="showEventForm('prepayment')"><i class="fas fa-wallet"></i> Prepayment</button>
+                <button onclick="showEventForm('emi')"><i class="fas fa-exchange-alt"></i> EMI Change</button>
+                <button onclick="showEventForm('tenure')"><i class="fas fa-clock"></i> Tenure Change</button>
+            </div>
+
+            <div id="eventForm" style="display: none;">
+                <div class="input-group">
+                    <label>Event Date</label>
+                    <input type="text" id="eventDate" class="flatpickr-input">
+                </div>
+                <div class="input-group">
+                    <label id="eventValueLabel">Value</label>
+                    <input type="number" id="eventValue">
+                </div>
+                <button onclick="addEvent()">Add Event</button>
+            </div>
+
             <div id="eventsList" class="event-list"></div>
         </div>
 
+        <!-- Chart -->
         <canvas id="loanChart"></canvas>
 
-        <div class="amount-summary">
-            <div class="summary-card">
-                <h3>Total Principal</h3>
-                <p id="totalPrincipal"></p>
-            </div>
-            <div class="summary-card">
-                <h3>Total Interest</h3>
-                <p id="totalInterest"></p>
-            </div>
-            <div class="summary-card">
-                <h3>Total Payment</h3>
-                <p id="totalPayment"></p>
-            </div>
-        </div>
-
+        <!-- Schedule Table -->
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -333,6 +340,7 @@
             </table>
         </div>
 
+        <!-- Optimization Tips -->
         <div class="optimization-tips">
             <h3><i class="fas fa-lightbulb"></i> Optimization Tips</h3>
             <div id="tips"></div>
@@ -341,7 +349,7 @@
 
     <footer>
         <p>Made with ❤️ by Tokudai
-            <a href="https://github.com/tokudai-vs" target="_blank" style="color: var(--text);">
+            <a href="https://github.com/tokudai-vs" target="_blank" style="color: var(--text); margin-left: 0.5rem;">
                 <i class="fab fa-github"></i>
             </a>
         </p>
@@ -349,24 +357,28 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         const DateTime = luxon.DateTime;
         let loanChart = null;
         let events = [];
-        let currencyFormatter = new Intl.NumberFormat(navigator.language, {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 2
-        });
+        let currentEventType = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            // Set default currency based on locale
-            const userLocale = navigator.language.split('-')[1] || 'INR';
-            document.getElementById('currency').value = userLocale;
-            updateCurrency();
+            // Date Pickers
+            flatpickr("#startDate", {
+                dateFormat: "Y-m-d",
+                defaultDate: new Date(),
+                theme: "material_blue"
+            });
 
-            // Input synchronization
+            flatpickr("#eventDate", {
+                dateFormat: "Y-m-d",
+                theme: "material_blue"
+            });
+
+            // Input Synchronization
             const syncInputs = (source, target) => {
                 document.getElementById(source).addEventListener('input', function () {
                     document.getElementById(target).value = this.value;
@@ -381,9 +393,6 @@
 
             document.getElementById('years').addEventListener('input', calculate);
             document.getElementById('months').addEventListener('input', calculate);
-            document.querySelectorAll('input[name="dateFormat"]').forEach(input => {
-                input.addEventListener('change', calculate);
-            });
 
             calculate();
         });
@@ -392,23 +401,59 @@
         document.getElementById('themeSwitch').addEventListener('change', toggleTheme);
 
         function toggleTheme() {
-            document.body.setAttribute('data-theme',
-                document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
-            );
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
             updateChartColors();
         }
 
-        function updateCurrency() {
-            const currency = document.getElementById('currency').value;
-            currencyFormatter = new Intl.NumberFormat(navigator.language, {
-                style: 'currency',
-                currency: currency,
-                maximumFractionDigits: 2
-            });
+        // Event Handling
+        function showEventForm(type) {
+            currentEventType = type;
+            const labels = {
+                rate: 'New Rate (%)',
+                prepayment: 'Amount',
+                emi: 'New EMI',
+                tenure: 'New Tenure (months)'
+            };
+            document.getElementById('eventValueLabel').textContent = labels[type];
+            document.getElementById('eventForm').style.display = 'block';
+        }
+
+        function addEvent() {
+            const event = {
+                type: currentEventType,
+                date: document.getElementById('eventDate').value,
+                value: parseFloat(document.getElementById('eventValue').value)
+            };
+
+            if (event.date && event.value) {
+                events.push(event);
+                events.sort((a, b) => new Date(a.date) - new Date(b.date));
+                updateEventList();
+                calculate();
+            }
+        }
+
+        function updateEventList() {
+            const list = document.getElementById('eventsList');
+            list.innerHTML = events.map(event => `
+                <div class="event-card">
+                    <div>
+                        <strong>${event.type.toUpperCase()}</strong><br>
+                        ${event.date} - ${event.value}
+                    </div>
+                    <button onclick="removeEvent(${events.indexOf(event)})">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        function removeEvent(index) {
+            events.splice(index, 1);
+            updateEventList();
             calculate();
         }
 
-        // Core Calculation Logic
+        // Core Calculation
         function calculate() {
             const amount = parseFloat(document.getElementById('amount').value);
             const rate = parseFloat(document.getElementById('rate').value) / 100;
@@ -416,7 +461,6 @@
             const months = parseInt(document.getElementById('months').value) || 0;
             const tenure = years * 12 + months;
             const startDate = DateTime.fromISO(document.getElementById('startDate').value);
-            const dateFormat = document.querySelector('input[name="dateFormat"]:checked').value;
 
             let balance = amount;
             let currentRate = rate;
@@ -424,12 +468,12 @@
             let currentDate = startDate;
             let remainingTenure = tenure;
             let emi = calculateEMI(amount, currentRate, tenure);
-            let eventQueue = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // Process events
+            const eventQueue = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
 
             for (let month = 1; month <= tenure && balance > 0; month++) {
-                let eventsThisMonth = [];
-
-                // Process events
+                // Check for events
                 while (eventQueue.length > 0 && DateTime.fromISO(eventQueue[0].date) <= currentDate) {
                     const event = eventQueue.shift();
                     switch (event.type) {
@@ -446,7 +490,6 @@
                             remainingTenure = event.value;
                             break;
                     }
-                    eventsThisMonth.push(event);
                 }
 
                 // Recalculate EMI if needed
@@ -462,44 +505,42 @@
                 remainingTenure--;
 
                 schedule.push({
-                    date: currentDate,
+                    date: currentDate.toFormat('dd MMM yyyy'),
                     emi,
                     principal,
                     interest,
                     balance,
-                    rate: currentRate,
-                    events: eventsThisMonth
+                    rate: currentRate * 100
                 });
 
                 currentDate = currentDate.plus({ months: 1 });
             }
 
             updateChart(schedule);
-            updateSchedule(schedule, dateFormat);
-            updateSummary(schedule);
-            generateTips(schedule);
+            updateSchedule(schedule);
+            generateTips();
         }
 
         function calculateEMI(P, r, n) {
             const monthlyRate = r / 12;
-            return (P * monthlyRate * Math.pow(1 + monthlyRate, n)) /
-                (Math.pow(1 + monthlyRate, n) - 1);
+            return (P * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
         }
 
         function updateChart(schedule) {
             const ctx = document.getElementById('loanChart').getContext('2d');
             const principal = schedule.reduce((sum, p) => sum + p.principal, 0);
             const interest = schedule.reduce((sum, p) => sum + p.interest, 0);
+            const total = principal + interest;
 
             if (loanChart) loanChart.destroy();
 
             loanChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Principal', 'Interest'],
+                    labels: ['Principal', 'Interest', 'Total'],
                     datasets: [{
-                        data: [principal, interest],
-                        backgroundColor: ['#24774c', '#ff9f43'],
+                        data: [principal, interest, total],
+                        backgroundColor: ['#24774c', '#ff9f43', '#6c757d'],
                         borderWidth: 0
                     }]
                 },
@@ -515,155 +556,56 @@
             });
         }
 
-        function updateSchedule(schedule, dateFormat) {
-            const tbody = document.getElementById('schedule');
-            tbody.innerHTML = schedule.map((payment, index) => {
-                const date = dateFormat === 'month' ?
-                    payment.date.toFormat('MMMM yyyy') :
-                    payment.date.toFormat('dd MMM yyyy');
+        function updateChartColors() {
+            if (loanChart) {
+                loanChart.options.plugins.legend.labels.color =
+                    getComputedStyle(document.body).getPropertyValue('--text');
+                loanChart.update();
+            }
+        }
 
-                return `
-                    <tr class="${payment.events.length ? 'event-row' : ''}">
-                        <td>${date}</td>
-                        <td>${currencyFormatter.format(payment.emi)}</td>
-                        <td>${currencyFormatter.format(payment.principal)}</td>
-                        <td>${currencyFormatter.format(payment.interest)}</td>
-                        <td>${currencyFormatter.format(payment.balance)}</td>
-                        <td>${(payment.rate * 100).toFixed(2)}%</td>
-                        <td>
-                            <div class="context-menu">
-                                <i class="fas fa-ellipsis-v"></i>
-                                <div class="menu-content">
-                                    <div class="menu-item" onclick="showAdjustmentForm(${index}, 'emi')">
-                                        Adjust EMI
-                                    </div>
-                                    <div class="menu-item" onclick="showAdjustmentForm(${index}, 'tenure')">
-                                        Adjust Tenure
-                                    </div>
-                                </div>
+        function updateSchedule(schedule) {
+            const formatter = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            });
+
+            document.getElementById('schedule').innerHTML = schedule.map(item => `
+                <tr>
+                    <td>${item.date}</td>
+                    <td>${formatter.format(item.emi)}</td>
+                    <td>${formatter.format(item.principal)}</td>
+                    <td>${formatter.format(item.interest)}</td>
+                    <td>${formatter.format(item.balance)}</td>
+                    <td>${item.rate.toFixed(1)}%</td>
+                    <td>
+                        <div class="context-menu">
+                            <i class="fas fa-ellipsis-v"></i>
+                            <div class="menu-content">
+                                <div class="menu-item" onclick="adjustEMI(${schedule.indexOf(item)})">Adjust EMI</div>
+                                <div class="menu-item" onclick="adjustTenure(${schedule.indexOf(item)})">Adjust Tenure</div>
                             </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function updateSummary(schedule) {
-            const totalPrincipal = schedule.reduce((sum, p) => sum + p.principal, 0);
-            const totalInterest = schedule.reduce((sum, p) => sum + p.interest, 0);
-
-            document.getElementById('totalPrincipal').textContent = currencyFormatter.format(totalPrincipal);
-            document.getElementById('totalInterest').textContent = currencyFormatter.format(totalInterest);
-            document.getElementById('totalPayment').textContent = currencyFormatter.format(totalPrincipal + totalInterest);
-        }
-
-        function generateTips(schedule) {
-            const totalInterest = schedule.reduce((sum, p) => sum + p.interest, 0);
-            const tips = [];
-
-            if (totalInterest > parseFloat(document.getElementById('amount').value * 0.5) {
-                tips.push("💡 Consider making prepayments to reduce total interest burden");
-            }
-
-            if (schedule.some(p => p.events.length > 0)) {
-                tips.push("💡 Your current events are saving " +
-                    currencyFormatter.format(
-                        calculatePotentialInterest() - totalInterest
-                    ) + " in interest");
-            }
-
-            document.getElementById('tips').innerHTML = tips.map(tip => `
-                <div class="tip">${tip}</div>
+                        </div>
+                    </td>
+                </tr>
             `).join('');
         }
 
-        function calculatePotentialInterest() {
-            // Calculate interest without any events for comparison
-            const amount = parseFloat(document.getElementById('amount').value);
-            const originalRate = parseFloat(document.getElementById('rate').value) / 100;
-            const years = parseInt(document.getElementById('years').value) || 0;
-            const months = parseInt(document.getElementById('months').value) || 0;
-            const tenure = years * 12 + months;
-
-            let balance = amount;
-            let totalInterest = 0;
-
-            for (let month = 1; month <= tenure && balance > 0; month++) {
-                const monthlyRate = originalRate / 12;
-                const interest = balance * monthlyRate;
-                const emi = calculateEMI(amount, originalRate, tenure);
-                const principal = Math.min(emi - interest, balance);
-
-                totalInterest += interest;
-                balance -= principal;
-            }
-
-            return totalInterest;
+        function generateTips() {
+            const tips = [
+                "💡 Making a 10% prepayment could reduce your interest by ~15%",
+                "💡 Negotiating a 0.5% lower rate could save thousands",
+                "💡 Maintaining EMI amount could shorten loan tenure"
+            ];
+            document.getElementById('tips').innerHTML = tips.map(tip => `
+                <div class="tip" style="margin: 1rem 0; padding: 1rem; background: rgba(36, 119, 76, 0.1); border-radius: 8px;">
+                    ${tip}
+                </div>
+            `).join('');
         }
 
-        // Event handling functions
-        function showAdjustmentForm(index, type) {
-                // Get existing schedule data
-                const schedule = Array.from(document.querySelectorAll('#schedule tr'))
-                    .map(row => ({
-                        date: row.cells[0].textContent,
-                        emi: parseFloat(row.cells[1].textContent.replace(/[^0-9.-]+/g, "")),
-                        balance: parseFloat(row.cells[4].textContent.replace(/[^0-9.-]+/g, ""))
-                    }));
-
-                // Create form elements
-                const form = document.createElement('div');
-                form.style.padding = '1rem';
-                form.style.background = 'var(--background)';
-                form.style.borderRadius = '8px';
-                form.style.margin = '1rem 0';
-
-                const label = document.createElement('label');
-                label.textContent = `New ${type === 'emi' ? 'EMI' : 'Tenure (months)'}:`;
-
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.step = type === 'emi' ? '100' : '1';
-                input.value = type === 'emi' ? schedule[index].emi.toFixed(0) : '';
-
-                const button = document.createElement('button');
-                button.textContent = 'Apply Adjustment';
-                button.style.marginTop = '0.5rem';
-
-                // Handle form submission
-                button.onclick = () => {
-                    if (!input.value || isNaN(input.value)) return;
-
-                    // Create new event
-                    const adjustmentDate = schedule[index].date;
-                    const event = {
-                        type: type === 'emi' ? 'emi' : 'tenure',
-                        date: DateTime.fromFormat(adjustmentDate, 'dd MMM yyyy').toISODate(),
-                        value: parseFloat(input.value)
-                    };
-
-                    // Add to events and recalculate
-                    events.push(event);
-                    events.sort((a, b) => new Date(a.date) - new Date(b.date));
-                    updateEventList();
-                    calculate();
-
-                    // Remove form
-                    form.remove();
-                };
-
-                // Add elements to form
-                form.appendChild(label);
-                form.appendChild(input);
-                form.appendChild(button);
-
-                // Insert after target row
-                const rows = document.querySelectorAll('#schedule tr');
-                rows[index].after(form);
-            }
-
         // Initial calculation
-        document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
         calculate();
     </script>
 </body>
